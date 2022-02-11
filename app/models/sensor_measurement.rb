@@ -5,12 +5,14 @@ class SensorMeasurement < ApplicationRecord
   end
 
   def generate_hash
-    self.attributes.with_indifferent_access.slice(
+    h = self.attributes.with_indifferent_access.slice(
       :id,
       :sensor_id,
       :data,
       :recorded_at,
       :checksum_digest,
     )
+
+    h.merge(type: self.sensor.type)
   end
 end

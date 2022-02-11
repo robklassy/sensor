@@ -21,6 +21,8 @@ describe SensorMeasurement do
         :recorded_at,
         :checksum_digest,
       )
+
+      h.merge!(type: sensor_measurement.sensor.type)
       expect(sensor_measurement.generate_hash).to eq(h)
     end
 

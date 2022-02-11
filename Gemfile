@@ -27,6 +27,7 @@ gem 'jbuilder', '~> 2.7'
 
 gem 'pg'
 gem 'sidekiq', '~> 6.1.3'
+gem 'state_machines'
 
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.4', require: false
