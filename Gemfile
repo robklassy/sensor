@@ -27,6 +27,7 @@ gem 'jbuilder', '~> 2.7'
 
 gem 'pg'
 gem 'sidekiq', '~> 6.1.3'
+gem 'sidekiq-cron'
 gem 'state_machines'
 
 # Reduces boot times through caching; required in config/boot.rb

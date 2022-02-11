@@ -15,7 +15,7 @@ module FileHelper
     if !status.success?
       raise stderr
     end
-    split_files = stdout.split(/\n/).map { |l| l.gsub('creating file ', '') }
+    split_files = stdout.split(/\n/).map { |l| l.gsub('creating file ', '').gsub("'", '') }
   end
 
 end

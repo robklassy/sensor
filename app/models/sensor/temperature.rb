@@ -1,8 +1,6 @@
 class Sensor::Temperature < Sensor::Base
   self.table_name = "sensors"
 
-
-
   validates :name, presence: true
   validates :location, presence: true
 
@@ -31,7 +29,9 @@ class Sensor::Temperature < Sensor::Base
       checksum_digest: generate_checksum_digest(data_hash.to_s),
       recorded_at: timestamp
     })
+
     sm.save!
+    update_attribute(:last_collected_at, timestamp)
     sm
   end
 

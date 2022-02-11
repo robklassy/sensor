@@ -54,10 +54,12 @@ class BatchMeasurement < ApplicationRecord
     self.gzip_filename = gzip_file(self.filename)
     self.split_filenames = split_file_into_parts(self.gzip_filename)
 
+    # create the data files
     self.split_filenames.each do |sf|
       self.batch_measurement_data_files.create(
-        data_type: 'split',
-        filename: sf
+        data_type: 'data',
+        filename: sf,
+        expected_delay: Ping.average_delay
       )
     end
 
@@ -66,5 +68,5 @@ class BatchMeasurement < ApplicationRecord
     cleanup_temp_files([self.filename, self.gzip_filename, self.split_filenames])
     raise e
   end
-  
+
 end

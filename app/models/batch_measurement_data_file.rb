@@ -1,11 +1,59 @@
 class BatchMeasurementDataFile < ApplicationRecord
   belongs_to :batch_measurement
 
-  MAX_NUMBER_OF_FILES_PER_SENSOR_TYPE = {
-    'Sensor::Temperature' => 5
-  }.freeze
+  include FileHelper
 
   FILE_EXPORT_PATH = "/tmp/export"
   FILE_TRANSMISSION_PATH = "/tmp/transmitted"
+  MAX_FILES_TO_TRANSMIT = 10
 
+  def self.transmit_pending_files
+    where('transmitted_at IS NULL')
+      .where('filename IS NOT NULL')
+      .order('created_at ASC')
+      .limit(MAX_FILES_TO_TRANSMIT).map(&:transmit)
+  end
+
+  # 'transmit' here just means copy it to the transmitted folder
+  def transmit
+    FileUtils.mkdir_p(BatchMeasurementDataFile::FILE_TRANSMISSION_PATH)
+
+    if self.transmit_filename.blank?
+      file = self.filename.split('/').last
+      update_attribute(:transmit_filename, "#{BatchMeasurementDataFile::FILE_TRANSMISSION_PATH}/#{file}")
+    end
+
+    return if File.exist?(transmit_filename)
+
+    stdout, stderr, status =
+      Open3
+        .capture3("cp \"#{self.filename}\" \"#{self.transmit_filename}\"")
+
+    if !status.success?
+      raise stderr
+    end
+
+    update_attribute(:transmitted_at, Time.now.getutc)
+  rescue => e
+    delete_transmission_file
+    raise e
+  end
+
+  def delete_transmission_file
+    cleanup_temp_files([self.transmit_filename])
+  end
+
+  def delete_exported_file
+    cleanup_temp_files([self.filename])
+  end
+
+  def ack(time=nil)
+    update_attribute(:acked_at, time || Time.now.getutc)
+  end
+
+  def update_batch_measurement_state
+  end
+
+  def archive
+  end
 end

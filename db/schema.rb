@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_10_211857) do
+ActiveRecord::Schema.define(version: 2022_02_11_200335) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -26,12 +26,50 @@ ActiveRecord::Schema.define(version: 2022_02_10_211857) do
     t.integer "expected_delay"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "transmit_filename"
     t.index ["batch_measurement_id"], name: "index_batch_measurement_data_files_on_batch_measurement_id"
   end
 
   create_table "batch_measurements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "state"
     t.text "file_string"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "earth_batch_measurement_data_files", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "earth_batch_measurement_id"
+    t.string "filename"
+    t.string "state"
+    t.datetime "received_at"
+    t.datetime "ack_sent_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["earth_batch_measurement_id"], name: "idx_ebmdf_earth_batch_measurement_id"
+  end
+
+  create_table "earth_batch_measurements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "state"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "earth_sensor_measurements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "earth_batch_measurement_id"
+    t.uuid "earth_sensor_id"
+    t.jsonb "data"
+    t.string "data_checksum"
+    t.datetime "recorded_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["earth_batch_measurement_id"], name: "index_earth_sensor_measurements_on_earth_batch_measurement_id"
+    t.index ["earth_sensor_id"], name: "index_earth_sensor_measurements_on_earth_sensor_id"
+  end
+
+  create_table "earth_sensors", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name"
+    t.string "location"
+    t.string "type"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
@@ -81,6 +119,8 @@ ActiveRecord::Schema.define(version: 2022_02_10_211857) do
   end
 
   add_foreign_key "batch_measurement_data_files", "batch_measurements"
+  add_foreign_key "earth_sensor_measurements", "earth_batch_measurements"
+  add_foreign_key "earth_sensor_measurements", "earth_sensors"
   add_foreign_key "sensor_measurements", "batch_measurements"
   add_foreign_key "sensor_measurements", "sensors"
 end
