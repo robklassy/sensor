@@ -29,6 +29,7 @@ gem 'pg'
 gem 'sidekiq', '~> 6.1.3'
 gem 'sidekiq-cron'
 gem 'state_machines'
+gem 'state_machines-activerecord'
 
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.4', require: false

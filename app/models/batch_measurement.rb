@@ -56,11 +56,25 @@ class BatchMeasurement < ApplicationRecord
 
     # create the data files
     self.split_filenames.each do |sf|
-      self.batch_measurement_data_files.create(
+      bmdf = self.batch_measurement_data_files.new(
         data_type: 'data',
-        filename: sf,
         expected_delay: Ping.average_delay
       )
+      bmdf.save!
+
+      base_fn = sf.split('.json.gz').first
+      split_suffix = sf.split('.json.gz').last
+      new_split_filename = "#{base_fn}---#{bmdf.id}.json.gz#{split_suffix}"
+
+      stdout, stderr, status =
+        Open3
+          .capture3("mv \"#{sf}\" \"#{new_split_filename}\"")
+
+      if !status.success?
+        raise stderr
+      end
+
+      bmdf.update_attribute(:filename, new_split_filename)
     end
 
     cleanup_temp_files([self.filename, self.gzip_filename])

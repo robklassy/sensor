@@ -4,7 +4,7 @@ class CreateEarthSensorMeasurement < ActiveRecord::Migration[6.1]
       t.references :earth_batch_measurement, type: :uuid, index: true, foreign_key: true
       t.references :earth_sensor, type: :uuid, index: true, foreign_key: true
       t.jsonb :data
-      t.string :data_checksum
+      t.string :checksum_digest
       t.datetime :recorded_at
 
       t.timestamps

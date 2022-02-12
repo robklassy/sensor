@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_11_200335) do
+ActiveRecord::Schema.define(version: 2022_02_12_042416) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -58,7 +58,7 @@ ActiveRecord::Schema.define(version: 2022_02_11_200335) do
     t.uuid "earth_batch_measurement_id"
     t.uuid "earth_sensor_id"
     t.jsonb "data"
-    t.string "data_checksum"
+    t.string "checksum_digest"
     t.datetime "recorded_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
@@ -72,6 +72,7 @@ ActiveRecord::Schema.define(version: 2022_02_11_200335) do
     t.string "type"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "sensor_type"
   end
 
   create_table "pings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

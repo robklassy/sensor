@@ -26,7 +26,7 @@ class Sensor::Temperature < Sensor::Base
 
     sm = sensor_measurements.new({
       data: data_hash,
-      checksum_digest: generate_checksum_digest(data_hash.to_s),
+      checksum_digest: Digest::SHA256.hexdigest(data_hash.to_s),
       recorded_at: timestamp
     })
 
@@ -44,9 +44,5 @@ class Sensor::Temperature < Sensor::Base
   def generate_temperature_f
     rand((-10000.00)..(10000.00)).round(3)
   end
-
-  def generate_checksum_digest(string)
-    Digest::SHA256.hexdigest(string)
-  end
-
+  
 end

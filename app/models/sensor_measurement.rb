@@ -13,6 +13,10 @@ class SensorMeasurement < ApplicationRecord
       :checksum_digest,
     )
 
-    h.merge(type: self.sensor.type)
+    h.merge(
+      type: self.sensor.type,
+      location: self.sensor.location,
+      name: self.sensor.name
+    )
   end
 end
