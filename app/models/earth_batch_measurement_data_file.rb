@@ -13,7 +13,7 @@ class EarthBatchMeasurementDataFile < ApplicationRecord
       .select { |rf| rf =~ bm_regex }
       .reject { |rf| rf !~ /split/i }
 
-      files_to_receive.each do |rf|
+    files_to_receive.each do |rf|
       next if rf !~ bm_regex
 
       bm_id = rf.scan(bm_regex).first.gsub('--', '')
@@ -43,7 +43,4 @@ class EarthBatchMeasurementDataFile < ApplicationRecord
   def send_ack
     #launch transmit command worker here
   end
-
-
-
 end

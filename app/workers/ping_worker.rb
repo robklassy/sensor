@@ -8,7 +8,7 @@ class PingWorker
       interval = rand(10..14)
       p = Ping.create
       PingResponseWorker.perform_in(interval.seconds, p.id)
-      sleep(0.3)
+      sleep(5)
     end
 
     Ping.timeout_pings
