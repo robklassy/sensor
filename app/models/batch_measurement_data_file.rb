@@ -6,12 +6,27 @@ class BatchMeasurementDataFile < ApplicationRecord
   FILE_EXPORT_PATH = "/tmp/export"
   FILE_TRANSMISSION_PATH = "/tmp/transmitted"
   MAX_FILES_TO_TRANSMIT = 10
+  MAX_FILES_TO_RETRY = 5
 
   def self.transmit_pending_files
     where('transmitted_at IS NULL')
       .where('filename IS NOT NULL')
       .order('created_at ASC')
-      .limit(MAX_FILES_TO_TRANSMIT).map(&:transmit)
+      .limit(MAX_FILES_TO_TRANSMIT)
+      .map(&:transmit)
+  end
+
+  # TODO - do time comparison in pg
+  def self.retransmit_timed_out_files
+    where('transmitted_at is NOT NULL')
+      .where('acked_at is NULL')
+      .order('transmitted_at ASC')
+      .limit(MAX_FILES_TO_RETRY)
+      .each do |rf|
+        if Time.now.getutc.to_i > (rf.transmitted_at.to_i + rf.expected_delay)
+          rf.transmit
+        end
+      end
   end
 
   # 'transmit' here just means copy it to the transmitted folder
@@ -23,7 +38,9 @@ class BatchMeasurementDataFile < ApplicationRecord
       update_attribute(:transmit_filename, "#{BatchMeasurementDataFile::FILE_TRANSMISSION_PATH}/#{file}")
     end
 
-    return if File.exist?(transmit_filename)
+    # this blocks it from actually retrying of course
+    # return if File.exist?(transmit_filename)
+    # disable to allow retries
 
     stdout, stderr, status =
       Open3

@@ -11,6 +11,14 @@ describe BatchMeasurementDataFile do
     s
   end
 
+  let!(:acked_pings) do
+    25.times do
+      p = Ping.create
+      p.ack(Time.now.getutc + rand(12..17).seconds)
+      sleep(0.1)
+    end
+  end
+
   let!(:sensor_measurement) do
     25.times { sleep(0.07); sensor.collect_data }
   end
@@ -58,6 +66,28 @@ describe BatchMeasurementDataFile do
       BatchMeasurementDataFile.transmit_pending_files
       expect(BatchMeasurementDataFile.where('transmitted_at IS NOT NULL')
         .count(1)).to be_between(1, BatchMeasurementDataFile::MAX_FILES_TO_TRANSMIT)
+      BatchMeasurementDataFile.all.map(&:delete_transmission_file)
+      BatchMeasurementDataFile.all.map(&:delete_exported_file)
+    end
+  end
+
+  describe '.retransmit_timed_out_files' do
+    it 'retransmits timed out files' do
+      transmitted_ats = BatchMeasurementDataFile.all.map(&:transmitted_at)
+      expect(transmitted_ats.compact.count).to eq(0)
+      BatchMeasurementDataFile.transmit_pending_files
+      expect(BatchMeasurementDataFile.where('transmitted_at IS NOT NULL')
+        .count(1)).to be_between(1, BatchMeasurementDataFile::MAX_FILES_TO_TRANSMIT)
+
+      before_transmitted_ats = BatchMeasurementDataFile.all.map(&:transmitted_at)
+      BatchMeasurementDataFile.where('transmitted_at IS NOT NULL').update_all(expected_delay: 2)
+
+      sleep(3)
+      BatchMeasurementDataFile.retransmit_timed_out_files
+      after_transmitted_ats = BatchMeasurementDataFile.all.map(&:transmitted_at)
+
+      expect(after_transmitted_ats.map(&:to_i).sort.first - before_transmitted_ats.map(&:to_i).sort.first).to be >= 3
+
       BatchMeasurementDataFile.all.map(&:delete_transmission_file)
       BatchMeasurementDataFile.all.map(&:delete_exported_file)
     end

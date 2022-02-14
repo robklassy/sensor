@@ -22,7 +22,11 @@ describe SensorMeasurement do
         :checksum_digest,
       )
 
-      h.merge!(type: sensor_measurement.sensor.type)
+      h.merge!(
+        type: sensor_measurement.sensor.type,
+        location: sensor_measurement.sensor.location,
+        name: sensor_measurement.sensor.name
+      )
       expect(sensor_measurement.generate_hash).to eq(h)
     end
 

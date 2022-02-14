@@ -100,13 +100,16 @@ class EarthBatchMeasurement < ApplicationRecord
         'recorded_at'
       ))
       create_hash['earth_sensor_id'] = meas_data['sensor_id']
-      
+
       self.earth_sensor_measurements.create(create_hash)
     end
   end
 
   def send_ack
-    self.earth_batch_measurement_data_files.map(&:send_ack)
+    df_ids = self.earth_batch_measurement_data_files.pluck(:id)
+    BatchMeasurementDataFile.where(id: df_ids).update_all(
+      acked_at: Time.now.getutc
+    )
   end
 
 end
