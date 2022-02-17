@@ -20,6 +20,7 @@ describe BatchMeasurement do
       expect(BatchMeasurement.count).to be > 0
       expect(SensorMeasurement.where('batch_measurement_id IS NOT NULL').count(1)).to eq(20)
       expect(BatchMeasurementDataFile.count).to be > 0
+      BatchMeasurement.cleanup_transmitted_batches
     end
 
   end

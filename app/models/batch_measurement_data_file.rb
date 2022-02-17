@@ -51,6 +51,7 @@ class BatchMeasurementDataFile < ApplicationRecord
     end
 
     update_attribute(:transmitted_at, Time.now.getutc)
+    update_batch_measurement_transmitted_state
   rescue => e
     delete_transmission_file
     raise e
@@ -68,9 +69,17 @@ class BatchMeasurementDataFile < ApplicationRecord
     update_attribute(:acked_at, time || Time.now.getutc)
   end
 
-  def update_batch_measurement_state
+  def update_batch_measurement_transmitted_state
+    self.batch_measurement.update_transmitted_state
   end
 
-  def archive
+  def update_batch_measurement_acked_state
+    self.batch_measurement.update_acked_state
+  end
+
+  def destroy
+    delete_exported_file
+    delete_transmission_file
+    super
   end
 end

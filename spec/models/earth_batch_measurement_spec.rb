@@ -17,10 +17,14 @@ describe EarthBatchMeasurement do
     EarthBatchMeasurementDataFile.receive_new_files
   end
 
+  after(:each) do
+    BatchMeasurement.cleanup_transmitted_batches
+  end
+
   describe '#process' do
     it 'creates correct objects' do
       ebm = EarthBatchMeasurement.first
-      ebm.process
+      #ebm.process
       expect(EarthSensor.count).to be > 0
       expect(EarthSensorMeasurement.count).to be > 0
     end

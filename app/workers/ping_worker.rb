@@ -17,4 +17,4 @@ class PingWorker
 
 end
 
-Sidekiq::Cron::Job.create(name: 'PingWorker', cron: '*/3 * * * *', class: 'PingWorker')
+Sidekiq::Cron::Job.create(name: 'PingWorker', cron: '*/1 * * * *', class: 'PingWorker')

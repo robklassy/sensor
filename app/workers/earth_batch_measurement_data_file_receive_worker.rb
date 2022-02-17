@@ -7,4 +7,4 @@ class EarthBatchMeasurementDataFileReceiveWorker
 
 end
 
-Sidekiq::Cron::Job.create(name: 'EarthBatchMeasurementDataFileReceiveWorker', cron: '*/5 * * * *', class: 'EarthBatchMeasurementDataFileReceiveWorker')
+Sidekiq::Cron::Job.create(name: 'EarthBatchMeasurementDataFileReceiveWorker', cron: '*/1 * * * *', class: 'EarthBatchMeasurementDataFileReceiveWorker')

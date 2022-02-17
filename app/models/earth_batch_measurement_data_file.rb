@@ -13,6 +13,7 @@ class EarthBatchMeasurementDataFile < ApplicationRecord
       .select { |rf| rf =~ bm_regex }
       .reject { |rf| rf !~ /split/i }
 
+    ebm = nil
     files_to_receive.each do |rf|
       next if rf !~ bm_regex
 
@@ -38,6 +39,8 @@ class EarthBatchMeasurementDataFile < ApplicationRecord
         ebmdf.save!
       end
     end
+
+    ebm.try(:process)
   end
 
   def send_ack

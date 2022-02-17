@@ -1,9 +1,9 @@
 class SensorCollectionWorker
   include Sidekiq::Worker
-
+  
   def perform
     Sensor::Base.all.each do |s|
-      s.collect_data
+      10.times { sleep(0.1); s.collect_data }
     end
   end
 end

@@ -16,6 +16,10 @@ describe EarthBatchMeasurementDataFile do
     BatchMeasurementDataFile.transmit_pending_files
   end
 
+  after(:each) do
+    BatchMeasurement.cleanup_transmitted_batches
+  end
+
   describe '.receive_new_files' do
     it 'creates correct objects' do
       EarthBatchMeasurementDataFile.receive_new_files

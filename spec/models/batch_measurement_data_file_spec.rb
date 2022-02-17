@@ -27,6 +27,10 @@ describe BatchMeasurementDataFile do
     BatchMeasurement.generate_next_batch_measurement
   end
 
+  after(:each) do
+    BatchMeasurement.cleanup_transmitted_batches
+  end
+
   describe '#transmit' do
     context 'file does not exist' do
       it 'copies file to transmit dir' do

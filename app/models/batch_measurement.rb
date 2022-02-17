@@ -5,6 +5,40 @@ class BatchMeasurement < ApplicationRecord
   include FileHelper
   include GzipHelper
 
+  state_machine :state, initial: :new do
+    state :new
+    state :generating_files
+    state :ready_to_transmit
+    state :files_transmitting
+    state :files_transmitted
+    state :all_files_acked
+    state :errored
+
+    event :generate_files do
+      transition new: :generating_files
+    end
+
+    event :finish_generate_files do
+      transition generating_files: :ready_to_transmit
+    end
+
+    event :transmit_files do
+      transition ready_to_transmit: :files_transmitting
+    end
+
+    event :finish_transmit_files do
+      transition files_transmitting: :files_transmitted
+    end
+
+    event :ack_all_files do
+      transition files_transmitted: :all_files_acked
+    end
+
+    event :error_out do
+      transition all => :errored
+    end
+  end
+
   MAX_BATCH_MEASUREMENT_FILES_PER_SENSOR_TYPE = {
     'Sensor::Temperature' => 20,
   }.freeze
@@ -22,6 +56,7 @@ class BatchMeasurement < ApplicationRecord
 
       if count > 0
           bm = BatchMeasurement.create
+          bm.generate_files
 
           SensorMeasurement.joins(:sensor)
             .where(batch_measurement_id: nil)
@@ -31,7 +66,14 @@ class BatchMeasurement < ApplicationRecord
               sm.update_attribute(:batch_measurement_id, bm.id)
             end
           bm.generate_batch_measurement_data_files
+          bm.finish_generate_files
       end
+    end
+  end
+
+  def self.cleanup_transmitted_batches
+    where(state: 'all_files_acked').each do |bm|
+      bm.batch_measurement_data_files.map(&:destroy)
     end
   end
 
@@ -81,6 +123,20 @@ class BatchMeasurement < ApplicationRecord
   rescue => e
     cleanup_temp_files([self.filename, self.gzip_filename, self.split_filenames])
     raise e
+  end
+
+  def update_transmitted_state
+    if self.batch_measurement_data_files.where('transmitted_at IS NOT NULL').count ==
+      self.batch_measurement_data_files.count
+        self.finish_transmit_files
+    end
+  end
+
+  def update_acked_state
+    if self.batch_measurement_data_files.where('transmitted_at IS NOT NULL AND acked_at IS NOT NULL').count ==
+      self.batch_measurement_data_files.count
+        self.ack_all_files
+    end
   end
 
 end
